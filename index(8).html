@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realty Check | The Real Estate Price Guessing Game</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .heading-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        .blur-bg {
+            backdrop-filter: blur(12px);
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(0.99); }
+        }
+        .pulse-element {
+            animation: pulse-subtle 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Navigation / Ambient Banner -->
+    <header class="border-b border-slate-800/80 bg-[#0e1424]/60 blur-bg sticky top-0 z-50 px-6 py-4 transition-all">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="location.reload()">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="heading-font text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+                        Realty <span class="text-indigo-400">Check</span>
+                    </h1>
+                    <p class="text-[10px] tracking-widest text-indigo-400/80 font-bold uppercase -mt-0.5">The Valuation Game</p>
+                </div>
+            </div>
+            
+            <!-- Global Live Score Counter (Invisible on Setup Screen) -->
+            <div id="nav-score-container" class="hidden flex items-center space-x-4 bg-slate-900/80 border border-slate-800 px-4 py-1.5 rounded-full">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Score:</div>
+                <div id="nav-score-display" class="font-mono text-base font-black text-indigo-400">0</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Interface Layout -->
+    <main class="max-w-6xl w-full mx-auto px-4 py-8 flex-grow flex items-center justify-center">
+
+        <!-- SCREEN 1: WELCOME & CONFIGURATION LOBBY -->
+        <section id="screen-welcome" class="w-full max-w-xl bg-[#0f172a] p-8 rounded-3xl border border-slate-800/80 shadow-2xl relative overflow-hidden transition-all duration-300">
+            <!-- Background Decorative Lights -->
+            <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="text-center mb-8">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-widest">Solo Edition</span>
+                <h2 class="heading-font text-3xl font-extrabold text-white mt-3 tracking-tight">Test Your Real Estate Intuition</h2>
+                <p class="text-sm text-slate-400 mt-2 max-w-sm mx-auto">We'll fetch real, active MLS home listings from your target region. Guess the list price based on specs and photos!</p>
+            </div>
+
+            <div class="space-y-5 relative z-10">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 tracking-wider">Target Region / Zip / City</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12.054 14.864a6.75 6.75 0 11.024-9.517 6.746 6.746 0 01-.024 9.517zm0 0l3.69 3.69" />
+                            </svg>
+                        </span>
+                        <input type="text" id="geo-target" class="w-full bg-[#070a13] border border-slate-800 rounded-2xl pl-12 pr-4 py-4 text-white font-medium placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all text-base" placeholder="e.g., Miami, FL or 90210">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 tracking-wider">RapidAPI Key (Required for live data)</label>
+                    <input type="password" id="api-key" class="w-full bg-[#070a13] border border-slate-800 rounded-2xl px-4 py-4 text-white font-mono placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all text-sm" placeholder="Paste your zillow-com1 API key...">
+                    <p class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                        Uses the <a href="https://rapidapi.com/apimaker/api/zillow-com1" target="_blank" class="text-indigo-400 hover:underline">Zillow.com1 API</a> via RapidAPI. Sign up for free to grab your active deployment token key.
+                    </p>
+                </div>
+
+                <div class="pt-2">
+                    <button id="start-game-btn" onclick="launchAppEngine()" class="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-95 text-white font-bold py-4 px-6 rounded-2xl shadow-xl shadow-indigo-500/10 tracking-wide uppercase text-sm transition-all duration-150 transform hover:-translate-y-0.5">
+                        Scan Local MLS Listings
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: ACTIVE GAMEPLAY PIPELINE -->
+        <section id="screen-gameplay" class="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch hidden transition-all duration-300">
+            
+            <!-- Left Side Dashboard: Imagery & Technical Specs (7 Columns) -->
+            <div class="lg:col-span-7 bg-[#0f172a] rounded-3xl border border-slate-800/80 shadow-xl overflow-hidden flex flex-col justify-between">
+                <!-- Primary Image Canvas Frame -->
+                <div class="relative aspect-[16/10] w-full bg-slate-950 group overflow-hidden">
+                    <img id="property-canvas" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'></svg>" alt="Active Listing Presentation" class="w-full h-full object-cover transition-transform duration-700 ease-out">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
+                    
+                    <!-- Round Floating Indicator -->
+                    <div class="absolute top-4 left-4 bg-[#070a13]/80 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-mono font-bold text-indigo-400 border border-slate-800/60">
+                        Property <span id="round-current-label">1</span> <span class="text-slate-600">/</span> 5
+                    </div>
+                </div>
+
+                <!-- Textual Context & Architectural Blueprint Dimensions -->
+                <div class="p-6 flex-grow flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-start justify-between mb-3">
+                            <h3 id="property-title-geo" class="text-xl font-bold tracking-tight text-white heading-font">Loading Property Coordinates...</h3>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider font-mono">For Sale</span>
+                        </div>
+
+                        <!-- Technical Parameter Grid Layout -->
+                        <div class="grid grid-cols-3 gap-3 text-center text-xs mb-5">
+                            <div class="bg-[#070a13]/60 p-3 rounded-2xl border border-slate-800/60">
+                                <span class="block text-slate-500 font-bold uppercase tracking-wider text-[10px] mb-0.5">Bedrooms</span>
+                                <span id="metric-beds" class="font-mono text-lg font-bold text-slate-200">-</span>
+                            </div>
+                            <div class="bg-[#070a13]/60 p-3 rounded-2xl border border-slate-800/60">
+                                <span class="block text-slate-500 font-bold uppercase tracking-wider text-[10px] mb-0.5">Bathrooms</span>
+                                <span id="metric-baths" class="font-mono text-lg font-bold text-slate-200">-</span>
+                            </div>
+                            <div class="bg-[#070a13]/60 p-3 rounded-2xl border border-slate-800/60">
+                                <span class="block text-slate-500 font-bold uppercase tracking-wider text-[10px] mb-0.5">Square Feet</span>
+                                <span id="metric-sqft" class="font-mono text-lg font-bold text-slate-200">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Marketing Copy Summary Box -->
+                    <div class="bg-[#070a13]/30 p-4 rounded-xl border border-slate-800/40">
+                        <span class="block text-[10px] uppercase font-bold text-slate-500 tracking-widest mb-1">Agent Listing Description Overview</span>
+                        <p id="property-marketing-narrative" class="text-xs text-slate-400 leading-relaxed max-h-24 overflow-y-auto pr-1">
+                            Pulling direct description from local MLS listings...
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side Dashboard: User Valuation Inputs & Analysis Panels (5 Columns) -->
+            <div class="lg:col-span-5 flex flex-col justify-between gap-6">
+                
+                <!-- Guess Submission Console Card -->
+                <div id="valuation-console" class="bg-[#0f172a] p-6 rounded-3xl border border-slate-800/80 shadow-xl">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Your Market Valuation</h3>
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xl font-bold font-mono">$</span>
+                            <input type="number" id="valuation-guess-input" class="w-full bg-[#070a13] border border-slate-800 rounded-2xl pl-10 pr-4 py-4 text-2xl font-mono font-bold text-white focus:outline-none focus:border-indigo-500 transition-all" placeholder="000,000" onkeydown="if(event.key==='Enter') commitPlayerValuation()">
+                        </div>
+                        <button id="valuation-lock-btn" onclick="commitPlayerValuation()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-4 rounded-2xl transition duration-150 shadow-md uppercase tracking-wider text-xs font-semibold">
+                            Lock In Guess
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Strategic Performance Statistics Feed -->
+                <div id="evaluation-dashboard" class="bg-[#0f172a] p-6 rounded-3xl border border-emerald-500/20 bg-gradient-to-b from-[#0f172a] to-emerald-950/10 shadow-xl hidden animate-fade-in">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center pb-3 border-b border-slate-800/60">
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-wider block font-bold">Actual List Price</span>
+                                <div id="feedback-actual-price" class="text-3xl font-mono font-black text-emerald-400">$0,000,000</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-slate-400 uppercase tracking-wider block font-bold">Accuracy Reward</span>
+                                <div id="feedback-points-delta" class="text-3xl font-mono font-black text-teal-400">+0</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mini Proximity Bar Visualization -->
+                        <div>
+                            <div class="flex justify-between text-[10px] text-slate-500 uppercase font-bold mb-1">
+                                <span>Your Guess: <span id="feedback-lbl-guess" class="font-mono text-slate-300"></span></span>
+                                <span id="feedback-lbl-variance"></span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+                                <div id="proximity-bar-fill" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <button id="round-advance-btn" onclick="stepToNextProperty()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-xl transition text-xs uppercase tracking-wider border border-slate-700">
+                            Next Property &rarr;
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Comprehensive Metrics Score Board -->
+                <div class="bg-[#0f172a] p-6 rounded-3xl border border-slate-800/80 shadow-xl flex-grow flex flex-col justify-center items-center text-center py-8 relative overflow-hidden">
+                    <div class="absolute -bottom-16 -left-16 w-32 h-32 bg-purple-600/5 rounded-full blur-2xl pointer-events-none"></div>
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-1">Total Score Tracker</span>
+                    <div id="cumulative-score-display" class="text-6xl font-mono font-black tracking-tight text-white">0</div>
+                    <p class="text-[10px] text-slate-500 uppercase font-mono mt-1 tracking-wider">Accumulated Performance (5,000 Max)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 3: END OF GAME LEADERBOARD / SUMMARY REPORT -->
+        <section id="screen-summary" class="w-full max-w-xl bg-[#0f172a] p-8 rounded-3xl border border-slate-800/80 shadow-2xl text-center hidden transition-all duration-300">
+            <div class="h-16 w-16 mx-auto rounded-2xl bg-gradient-to-tr from-yellow-400 to-amber-500 flex items-center justify-center shadow-xl shadow-amber-500/10 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+            </div>
+            <h2 class="heading-font text-3xl font-extrabold text-white tracking-tight">Market Valuation Complete!</h2>
+            <p class="text-sm text-slate-400 mt-1">Here is how well you understand your local area valuation metrics.</p>
+
+            <div class="my-8 bg-[#070a13] border border-slate-800 rounded-2xl p-6">
+                <span class="text-xs uppercase font-bold text-slate-500 tracking-wider block mb-1">Final Score Performance</span>
+                <div id="summary-final-score" class="text-6xl font-mono font-black text-indigo-400">0</div>
+                <div id="summary-tier-badge" class="mt-3 inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                    Evaluating...
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 px-6 rounded-2xl border border-slate-700 transition duration-150 uppercase tracking-wider text-xs">
+                Run Alternate Analysis
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Structural App Footer Footer -->
+    <footer class="text-center text-[11px] text-slate-600 tracking-wider py-5 border-t border-slate-900 bg-[#070a13]/80 font-mono">
+        REALTY CHECK // POWERED BY SECURE REAL-TIME REAL ESTATE TRANSIENT API INDEXERS
+    </footer>
+
+    <!-- LOGICAL APP ENGINE SCRIPT -->
+    <script>
+        // Core Encapsulated Application State Engine Context
+        const appState = {
+            geoQuery: '',
+            apiKey: '',
+            inventory: [],
+            currentRoundIndex: 0,
+            accumulatedScore: 0
+        };
+
+        const domScreens = {
+            welcome: document.getElementById('screen-welcome'),
+            gameplay: document.getElementById('screen-gameplay'),
+            summary: document.getElementById('screen-summary')
+        };
+
+        function routeToScreen(targetScreen) {
+            Object.values(domScreens).forEach(screen => screen.classList.add('hidden'));
+            domScreens[targetScreen].classList.remove('hidden');
+        }
+
+        /**
+         * Initialize App Engine State Context & Fetch Data Assets
+         */
+        async function launchAppEngine() {
+            const geoInp = document.getElementById('geo-target').value.trim();
+            const keyInp = document.getElementById('api-key').value.trim();
+
+            if (!geoInp) { alert('Please supply a target geographic location index.'); return; }
+            if (!keyInp) { alert('Please supply a valid RapidAPI authorization key.'); return; }
+
+            appState.geoQuery = geoInp;
+            appState.apiKey = keyInp;
+
+            // Update Trigger Buttons to Loading States
+            const actionBtn = document.getElementById('start-game-btn');
+            actionBtn.innerText = "Querying MLS Infrastructure Database...";
+            actionBtn.disabled = true;
+
+            // Ingest active real estate market data indexes
+            appState.inventory = await executeLiveMlsFetch(appState.geoQuery, appState.apiKey);
+
+            if (appState.inventory.length === 0) {
+                alert("Failed to resolve properties inside the specified location parameter. Double check your API token or targeted zone.");
+                actionBtn.innerText = "Scan Local MLS Listings";
+                actionBtn.disabled = false;
+                return;
+            }
+
+            // Expose active evaluation HUD elements
+            document.getElementById('nav-score-container').classList.remove('hidden');
+            routeToScreen('gameplay');
+            populateRoundMetrics();
+        }
+
+        /**
+         * Sync Properties and Layout Attributes per Round Instance
+         */
+        function populateRoundMetrics() {
+            // Reset Valuation Layout Blocks
+            document.getElementById('evaluation-dashboard').classList.add('hidden');
+            document.getElementById('valuation-console').classList.remove('opacity-40', 'pointer-events-none');
+            document.getElementById('valuation-guess-input').value = '';
+            document.getElementById('valuation-guess-input').disabled = false;
+
+            const property = appState.inventory[appState.currentRoundIndex];
+
+            // Render Metrics Targets
+            document.getElementById('round-current-label').innerText = appState.currentRoundIndex + 1;
+            document.getElementById('property-canvas').src = property.imgSrc;
+            document.getElementById('property-title-geo').innerText = property.address;
+            document.getElementById('metric-beds').innerText = property.beds || 'N/A';
+            document.getElementById('metric-baths').innerText = property.baths || 'N/A';
+            document.getElementById('metric-sqft').innerText = property.sqft ? property.sqft.toLocaleString() : 'N/A';
+            document.getElementById('property-marketing-narrative').innerText = property.description;
+        }
+
+        /**
+         * Process and Grade User Price Speculations
+         */
+        function commitPlayerValuation() {
+            const userRawGuess = document.getElementById('valuation-guess-input').value;
+            if (!userRawGuess || userRawGuess <= 0) { alert('Please input a proper real-number valuation context.'); return; }
+
+            const numericGuess = parseInt(userRawGuess);
+            const verifiedActualPrice = appState.inventory[appState.currentRoundIndex].actualPrice;
+
+            // Valuation Proximity Grader Formula
+            const trackingVariance = Math.abs(numericGuess - verifiedActualPrice) / verifiedActualPrice;
+            const pointsYield = Math.max(0, Math.round((1 - trackingVariance) * 1000));
+
+            appState.accumulatedScore += pointsYield;
+
+            // Lock UI Fields
+            document.getElementById('valuation-console').classList.add('opacity-40', 'pointer-events-none');
+            document.getElementById('valuation-guess-input').disabled = true;
+
+            // Hydrate Analysis Dashboards
+            document.getElementById('feedback-actual-price').innerText = `$${verifiedActualPrice.toLocaleString()}`;
+            document.getElementById('feedback-points-delta').innerText = `+${pointsYield.toLocaleString()}`;
+            document.getElementById('feedback-lbl-guess').innerText = `$${numericGuess.toLocaleString()}`;
+            
+            // Render Error Variances
+            const percentageVarianceDisplay = Math.round(trackingVariance * 100);
+            const varianceLabel = document.getElementById('feedback-lbl-variance');
+            if (numericGuess === verifiedActualPrice) {
+                varianceLabel.innerText = "Perfect Match!";
+                varianceLabel.className = "text-emerald-400 font-bold";
+            } else {
+                varianceLabel.innerText = `${percentageVarianceDisplay}% ${numericGuess > verifiedActualPrice ? 'Above' : 'Below'} List`;
+                varianceLabel.className = "font-mono font-bold text-pink-400";
+            }
+
+            // Animate Quality Gauge Slider
+            const matchAccuracyMultiplier = Math.max(0, 1 - trackingVariance);
+            document.getElementById('proximity-bar-fill').style.width = `${matchAccuracyMultiplier * 100}%`;
+
+            // Update Structural Top Score Displays
+            document.getElementById('nav-score-display').innerText = appState.accumulatedScore.toLocaleString();
+            document.getElementById('cumulative-score-display').innerText = appState.accumulatedScore.toLocaleString();
+
+            document.getElementById('evaluation-dashboard').classList.remove('hidden');
+        }
+
+        /**
+         * Cycle Across Round Iterators or Route to Summary Viewports
+         */
+        function stepToNextProperty() {
+            if (appState.currentRoundIndex < appState.inventory.length - 1) {
+                appState.currentRoundIndex++;
+                populateRoundMetrics();
+            } else {
+                // Compile and Trigger Finalized Performance Report
+                routeToScreen('summary');
+                document.getElementById('summary-final-score').innerText = appState.accumulatedScore.toLocaleString();
+                
+                // Assign Knowledge Tier Badges based on performance
+                const tierElement = document.getElementById('summary-tier-badge');
+                if (appState.accumulatedScore >= 4500) {
+                    tierElement.innerText = "Tier 1: Master Broker / Real Estate Legend";
+                    tierElement.className = "mt-3 inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                } else if (appState.accumulatedScore >= 3500) {
+                    tierElement.innerText = "Tier 2: Certified Local Appraiser";
+                    tierElement.className = "mt-3 inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-indigo-500/10 text-indigo-400 border border-indigo-500/20";
+                } else if (appState.accumulatedScore >= 2000) {
+                    tierElement.innerText = "Tier 3: Casual Zillow Scroller";
+                    tierElement.className = "mt-3 inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-yellow-500/10 text-yellow-400 border border-yellow-500/20";
+                } else {
+                    tierElement.innerText = "Tier 4: Volatile Speculator";
+                    tierElement.className = "mt-3 inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-pink-500/10 text-pink-400 border border-pink-500/20";
+                }
+            }
+        }
+
+        /**
+         * Fetch Pipeline to RapidAPI Real Estate Index Mirrored Endpoints
+         */
+        async function executeLiveMlsFetch(targetRegion, keyToken) {
+            const endpointUrl = `https://zillow-com1.p.rapidapi.com/propertyExtendedSearch?location=${encodeURIComponent(targetRegion)}&status_type=ForSale`;
+            
+            try {
+                const networkResponse = await fetch(endpointUrl, {
+                    method: 'GET',
+                    headers: {
+                        'X-RapidAPI-Key': keyToken,
+                        'X-RapidAPI-Host': 'zillow-com1.p.rapidapi.com'
+                    }
+                });
+                
+                if (!networkResponse.ok) throw new Error('API Request Error');
+                const rawData = await networkResponse.json();
+                
+                if (!rawData || !rawData.props || rawData.props.length === 0) return [];
+
+                // Sanitize and purge items containing invalid images or structural listings missing prices
+                const sanitizedPool = rawData.props.filter(item => item.price && item.imgSrc && !item.imgSrc.includes('comingsoon'));
+                
+                // Shuffle pool elements to ensure high uniqueness per session instance
+                const selectedItems = sanitizedPool.sort(() => 0.5 - Math.random()).slice(0, 5);
+                
+                return selectedItems.map(home => ({
+                    imgSrc: home.imgSrc,
+                    // Strip specific street addresses to retain data anonymity and prevent easy cheating lookups
+                    address: `${home.city || targetRegion}, ${home.state || ''}`,
+                    beds: home.bedrooms || home.beds || 'N/A',
+                    baths: home.bathrooms || home.baths || 'N/A',
+                    sqft: home.livingArea || home.squareFeet || 0,
+                    description: home.homeType ? `An exceptionally located ${home.homeType.toLowerCase()} currently configured for active market acquisition.` : "Active single-family property containing representative local structural dimensions.",
+                    actualPrice: parseInt(home.price)
+                }));
+
+            } catch (err) {
+                console.error("Critical Ingestion Failure:", err);
+                return [];
+            }
+        }
+    </script>
+</body>
+</html>
